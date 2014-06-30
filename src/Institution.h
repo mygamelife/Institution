@@ -27,4 +27,5 @@ int Institution_select(	LinkedList *inputList,
 						void *criterion,
 						int (*compare)(void *, void *));
 int isUniversityCollege (void *elem1 , void *type);
+int wasEstablishedBefore(void *elem , void *year);
 #endif // Institution_H

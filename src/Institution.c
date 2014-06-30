@@ -2,53 +2,93 @@
 #include "LinkedList.h"
 #include "Stack.h"
 #include <stdio.h>
-#include <malloc.h>
+#include "CException.h"
+#include "ErrorCode.h"
 
 int Institution_reverse(LinkedList *inputList, LinkedList *outputList)
 {	
-	int i = 0 ;
+	int i = 0 , count = 0 ;
 	Institution *ptr2Inst , *PopStack;
 	Stack *stack = Stack_create();
 	
-	//remove head and push into stack
+	/*removeHead and Push into stack*/
 	do
 	{
 		ptr2Inst = (Institution *)List_removeHead(inputList);
-		if(ptr2Inst != NULL)
-			printf("ptr2Inst %s\n" , ptr2Inst->name);
-		else
-			printf("ptr2Inst address %p\n" , ptr2Inst);
-		Stack_push(stack,ptr2Inst);
+		Stack_push(stack , ptr2Inst);
 	}while(ptr2Inst != NULL);
 	
-	//Pop the stack and add into tail
 	do
 	{
 		PopStack = Stack_pop(stack);
-		if(PopStack != NULL)
-			printf("PopStack %s\n" , *PopStack);
-		else
-			printf("PopStack address %p\n" , PopStack);
 		List_addTail(outputList , PopStack);
+		if(PopStack !=NULL)
+			count++;
 	}while(PopStack != NULL);
+	
+	return count; //minus one because the NULL 
 }
 
+/*Compare if institution are same type
+ *Input:
+ *			elem1 is a pointer to the first institution
+ *			type is a pointer to institution type
+*/
 int isUniversityCollege (void *elem1 , void *type)
 {
-	int *target_type = (int*)elem1;
-	int *expected_type = (int*)type;
+	Institution *Inst_type = (Institution *)elem1;
+	Institution *expected_type = (Institution *)type;
 	
-	if(target_type == expected_type)
+	if(Inst_type == expected_type)
 		return 1;
 	
 	else return 0;
 }
 
+/*Select if institution are same type
+ *Input:
+ *			inputList is a list of institions that we insert
+ *			outputList is a list of institions that we selected
+ *			criterion is a pointer to the criterion for selection
+ *Output:
+ *			number of institution selected
+*/
 int Institution_select(	LinkedList *inputList, 
 						LinkedList *outputList ,
 						void *criterion,
 						int (*compare)(void *, void *))
 {
-	int* criterion_type = (int*)criterion;
-	compare( , criterion);
+	int result = 0 , selected = 0;
+	Institution *inst;
+	
+	do
+	{
+		inst = (Institution *)List_removeHead(inputList);//insert first institution
+		
+		if(inst != NULL)
+			result = isUniversityCollege((Institution*)inst->type , (Institution*)criterion);//compare type
+
+		if(result == 1 && inst != NULL) //if type is same and inst not NULL
+		{
+			List_addTail(outputList , inst);
+			selected++;
+		}
+			
+	}while(inst != NULL);
+	
+	return selected++; //return selected institution type
+}
+
+int wasEstablishedBefore(void *elem , void *year)
+{
+	Institution* instYear = (Institution*)elem;
+	int *specified_year = (int*)year;
+		
+	if(instYear->yearEstablished > 2014)
+		Throw(ERR_INVALID_YEAR);
+		
+	if(instYear->yearEstablished < *specified_year)
+		return 1;
+		
+	else return 0;
 }
